@@ -188,6 +188,34 @@ Wechat.prototype.getUsers = async function() {
     })
 }
 
+/**创建标签
+ * 
+ */
+Wechat.prototype.createTag = async function(tag_name) {
+    var that = this;
+    var data = await that.fetchAccessToken();
+    return new Promise(function(resolve, reject) {
+        var url = api.tags.create + "access_token=" + data.access_token;
+        var body = {
+            tag: {
+                name: tag_name
+            }
+        }
+        var options = {
+            url: url,
+            method: "POST",
+            JSON: true,
+            body: JSON.stringify(body)
+        }
+        request(options, (err, res, body) => {
+            if (err) {
+                reject(err)
+            }
+            resolve(JSON.parse(body))
+        })
+    })
+}
+
 /**获取标签列表
  * 
  * @returns body
@@ -202,6 +230,62 @@ Wechat.prototype.getTags = async function() {
             method: 'GET',
             JSON: true
         }, (err, res, body) => {
+            if (err) {
+                reject(err)
+            }
+            resolve(JSON.parse(body))
+        })
+    })
+}
+
+/**更新标签
+ * 
+ */
+Wechat.prototype.updateTag = async function(tag_id, tag_name) {
+    var that = this;
+    var data = await that.fetchAccessToken();
+
+    return new Promise(function(resolve, reject) {
+        var url = api.tags.update + "access_token=" + data.access_token;
+        var body = {
+            tag: {
+                id: tag_id,
+                name: tag_name
+            }
+        }
+        var options = {
+            url: url,
+            method: "POST",
+            JSON: true,
+            body: JSON.stringify(body)
+        }
+        request(options, (err, res, body) => {
+            if (err) {
+                reject(err)
+            }
+            resolve(JSON.parse(body))
+        })
+    })
+}
+
+/**删除标签 */
+Wechat.prototype.deleteTag = async function(tag_id) {
+    var that = this;
+    var data = await that.fetchAccessToken();
+    return new Promise(function(resolve, reject) {
+        var url = api.tags.delete + 'access_token=' + data.access_token;
+        var body = {
+            tag: {
+                id: tag_id
+            }
+        }
+        var options = {
+            url: url,
+            method: "POST",
+            JSON: true,
+            body: JSON.stringify(body)
+        }
+        request(options, (err, res, body) => {
             if (err) {
                 reject(err)
             }

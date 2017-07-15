@@ -7,9 +7,42 @@ var wechatApi = new Wechat(config.wechat);
 router.get('/', async function(ctx, next) {
     // ctx.body = 'this is a users response!'
     ctx.body = await wechatApi.getTags();
-
 })
-router.get('/:id', async function(ctx, next) {
+
+/**查询某个用户所有标签
+ * 
+ */
+
+router.get('/fetch/:id', async function(ctx, next) {
     ctx.body = await wechatApi.fetchUserTag(ctx.params.id);
 })
+
+/**
+ * 创建标签
+ */
+router.get('/create/:name', async function(ctx, next) {
+    ctx.body = await wechatApi.createTag(ctx.params.name)
+})
+
+/**
+ * 创建标签
+ */
+router.post('/update', async function(ctx, next) {
+    /**GET  */
+    // var tagid = ctx.query.tagid;
+    // var tagname = ctx.query.tagname;
+    /**Post */
+    var tagid = ctx.request.body.tagid;
+    var tagname = ctx.request.body.tagname;
+    ctx.body = await wechatApi.updateTag(tagid, tagname)
+})
+
+/**删除标签 */
+router.post("/delete", async(ctx, next) => {
+    // var tagid = ctx.query.tagid;
+    var tagid = ctx.request.body.tagid;
+    ctx.body = await wechatApi.deleteTag(tagid);
+})
+
+
 module.exports = router
