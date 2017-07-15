@@ -44,5 +44,12 @@ router.post("/delete", async(ctx, next) => {
     ctx.body = await wechatApi.deleteTag(tagid);
 })
 
+/**获取标签下粉丝 */
+router.post("/getusers", async(ctx, next) => {
+    // var tagid = ctx.query.tagid;
+    var tagid = ctx.request.body.tagid;
+    ctx.body = await wechatApi.fetchTagUsers(tagid);
+})
+
 
 module.exports = router

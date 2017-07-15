@@ -32,6 +32,7 @@ var api = {
         get: prefix + 'tags/get?',
         update: prefix + 'tags/update?',
         delete: prefix + 'tags/delete?', //
+        getusers: prefix + 'user/tag/get?'
     },
     userset: {
         batchtagging: prefix + 'tags/members/batchtagging?', //批量用户增加标签
@@ -278,6 +279,32 @@ Wechat.prototype.deleteTag = async function(tag_id) {
             tag: {
                 id: tag_id
             }
+        }
+        var options = {
+            url: url,
+            method: "POST",
+            JSON: true,
+            body: JSON.stringify(body)
+        }
+        request(options, (err, res, body) => {
+            if (err) {
+                reject(err)
+            }
+            resolve(JSON.parse(body))
+        })
+    })
+}
+
+/**获取标签下的粉丝列表 */
+Wechat.prototype.fetchTagUsers = async function(tag_id, next_openid) {
+    var that = this;
+    var data = await that.fetchAccessToken();
+    return new Promise(function(resolve, reject) {
+        var url = api.tags.getusers + 'access_token=' + data.access_token;
+        next_openid = next_openid || ''
+        var body = {
+            tagid: tag_id,
+            next_openid: next_openid
         }
         var options = {
             url: url,
