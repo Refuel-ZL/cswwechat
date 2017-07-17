@@ -1,4 +1,6 @@
 var xml2js = require("xml2js");
+var moment = require('moment-timezone');
+moment.tz.setDefault("Asia/Shanghai");
 var tpl = require('./tpl');
 exports.parseXMLAsync = function(xml) {
     return new Promise(function(resolve, reject) {
@@ -51,7 +53,7 @@ exports.tpl = function(content, message) {
     type = content.type || type;
 
     info.content = content;
-    info.createTime = new Date().getTime();
+    info.createTime = moment().format('X');
     info.msgType = type;
     info.toUserName = fromUserName;
     info.fromUserName = toUserName;

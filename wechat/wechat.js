@@ -166,29 +166,6 @@ Wechat.prototype.fetchUserTag = async function(openid) {
     });
 }
 
-/**获取用户列表 超过一千个没处理
- * 
- * 
- */
-Wechat.prototype.getUsers = async function() {
-    var that = this;
-    var data = await that.fetchAccessToken();
-    return new Promise(function(resolve, reject) {
-        var url = api.userset.getusers + 'access_token=' + data.access_token;
-        console.log(url);
-        request({
-            url: url,
-            method: 'GET',
-            JSON: true
-        }, (err, res, body) => {
-            if (err) {
-                reject(err)
-            }
-            resolve(JSON.parse(body))
-        })
-    })
-}
-
 /**创建标签
  * 
  */
@@ -683,6 +660,33 @@ Wechat.prototype.batchMaterial = async function(form) {
         }
     })
 }
+
+/**获取用户列表 超过一千个没处理
+ * getUsers
+ * 
+ */
+Wechat.prototype.getUsers = async function() {
+    var that = this;
+    var data = await that.fetchAccessToken();
+    return new Promise(function(resolve, reject) {
+        var url = api.userset.getusers + 'access_token=' + data.access_token;
+        console.log(url);
+        request({
+            url: url,
+            method: 'GET',
+            JSON: true
+        }, (err, res, body) => {
+            if (err) {
+                reject(err)
+            }
+            resolve(JSON.parse(body))
+        })
+    })
+}
+
+/**设置用户备注名(仅服务号)
+ * 
+ */
 
 /** 打包xml 返回发送信息
  * 

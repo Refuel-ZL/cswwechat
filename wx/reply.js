@@ -5,6 +5,8 @@ var info = require('../package')
 var Wechat = require('../wechat/wechat');
 var csw = require('../libs/csw');
 var menu = require('./menu');
+var moment = require('moment-timezone');
+moment.tz.setDefault("Asia/Shanghai");
 
 // var wechatApi = new Wechat(config.wechat);
 
@@ -15,6 +17,7 @@ exports.reply = async function() {
     var message = this.weixin;
     var vvv = '支持命令如下:\n 查询某id值：#id'
     var reply = vvv;
+    console.log(moment().format("X"))
     if (message.MsgType === 'event') {
         if (message.Event === 'subscribe') {
             if (message.EventKey) {
@@ -30,12 +33,11 @@ exports.reply = async function() {
                     reply = info.greetings + '\n' + vvv
                     break;
                 case 'alarmlog':
-                    var from = GetDateStr(0);
-                    var end = GetDateStr(1);
+                    var from = moment().format("YYYYMMDD");
+                    var end = moment().add(1, 'days').format("YYYYMMDD");
                     var logvalue = await csw.getalarmlog(from, end, 1, 1000);
                     reply = '今日告警如下：';
                     if (logvalue) {
-                        console.log(logvalue)
                         logvalue.forEach(function(item) {
                             reply += '\n' + item.time + ' ' + item.msg + ' ' + item.status;
                         })
@@ -44,13 +46,12 @@ exports.reply = async function() {
                     }
                     break;
                 case 'alarmlog10':
-                    var from = GetDateStr(-1)
-                    var end = GetDateStr(0)
+                    var from = moment().add(-1, 'days').format("YYYYMMDD");
+                    var end = moment().format("YYYYMMDD");
                     var logvalue = []
                     logvalue = await csw.getalarmlog(from, end, 0, 10);
                     reply = '昨日告警top10如下：';
                     if (logvalue) {
-                        console.log(logvalue)
                         logvalue.forEach(function(item) {
                             reply += '\n' + item.deviceName + ' ' + item.count + '次';
                         })
@@ -153,7 +154,6 @@ exports.reply = async function() {
                         url: item.url,
                     })
                 });
-                // console.log(news)
                 reply = news
                 break;
             default:
@@ -162,16 +162,4 @@ exports.reply = async function() {
         }
     }
     this.body = reply;
-}
-
-
-function GetDateStr(AddDayCount) {
-    var dd = new Date();
-    dd.setDate(dd.getDate() + AddDayCount); //获取AddDayCount天后的日期 
-    var y = dd.getFullYear();
-    var m = dd.getMonth() + 1; //获取当前月份的日期 
-    var d = dd.getDate();
-    m = m > 9 ? m : ('0' + m);
-    d = d > 9 ? d : ('0' + d)
-    return y + "" + m + "" + d;
 }

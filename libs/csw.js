@@ -32,13 +32,18 @@ module.exports = {
             url: url,
             JSON: true
         }
-
+        console.log(url)
         return new Promise((resolve, reject) => {
             request(options, (err, res, body) => {
                 if (err) {
                     reject(err);
                 }
-                resolve(JSON.parse(body));
+                if (body) {
+                    resolve(JSON.parse(body));
+                } else {
+                    resolve(body);
+                }
+
             });
         });
 
@@ -62,7 +67,12 @@ module.exports = {
                 if (err) {
                     reject(err);
                 }
-                resolve(JSON.parse(body));
+                if (body) {
+                    resolve(JSON.parse(body));
+                } else {
+                    resolve(body);
+                }
+
             });
         })
     }
