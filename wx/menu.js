@@ -51,10 +51,15 @@ module.exports = {
         //     "type": "click",
         //     "key": "menu_click"
         // },
+        // {
+        //     "type": 'view',
+        //     'name': '今日告警',
+        //     "url": info.host + 'logs'
+        // }, 
         {
-            "type": 'view',
+            "type": 'click',
             'name': '今日告警',
-            "url": info.host + 'logs'
+            "key": "_alarmlog"
         }, {
             "name": "报警日志",
             "sub_button": [{

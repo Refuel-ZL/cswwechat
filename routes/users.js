@@ -16,5 +16,15 @@ router.get('/fetch/:id', async function(ctx, next) {
     ctx.body = await wechatApi.fetchUserTag(ctx.params.id);
 })
 
+router.get("/settag/:openid", async function(ctx, next) {
+    var openidlist = [ctx.params.openid]
+    ctx.body = await wechatApi.taggingUsersTag(100, openidlist);
+
+})
+router.get("/untag/:openid", async function(ctx, next) {
+    var openidlist = [ctx.params.openid]
+    ctx.body = await wechatApi.untaggingUsersTag(100, openidlist);
+
+})
 
 module.exports = router

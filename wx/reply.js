@@ -3,7 +3,7 @@
 var config = require('../config');
 var info = require('../package')
 var Wechat = require('../wechat/wechat');
-var csw = require('../libs/csw');
+var csw = require('../csw/csw');
 var menu = require('./menu');
 var moment = require('moment-timezone');
 moment.tz.setDefault("Asia/Shanghai");
@@ -26,11 +26,18 @@ exports.reply = async function() {
             reply = info.greetings + '\n' + vvv
         } else if (message.Event === 'CLICK') {
             switch (message.EventKey) {
-                case 'menu_click':
-                    if (message.EventKey) {
-                        console.log("扫二维码进来：" + message.EventKey + ' ' + message.Ticket);
-                    }
-                    reply = info.greetings + '\n' + vvv
+                case '_alarmlog':
+                    var picData = await wechatApi.uploadMaterial('pic', __dirname + '/2.jpg', {}); //获取url地址 不受素材数目的限制
+                    console.log(picData);
+                    reply = picData
+                    var news = []
+                    news.push({
+                        title: "今日告警",
+                        description: "查看今日有什么报警",
+                        picUrl: picData.url,
+                        url: info.host + 'logs',
+                    })
+                    reply = news
                     break;
                 case 'alarmlog':
                     var from = moment().format("YYYYMMDD");
@@ -60,7 +67,6 @@ exports.reply = async function() {
                     }
                     break;
                 default:
-                    reply = '无效指令';
                     break;
             }
         } else if (message.Event === 'LOCATION') {
@@ -119,7 +125,6 @@ exports.reply = async function() {
             case 'a':
                 //上传永久图片素材
                 var picData = await wechatApi.uploadMaterial('image', __dirname + '/2.jpg', { type: 'image' });
-
                 // var picData = {
                 //         media_id: "e-kE-1ewjSyqA-TY46BTLruYv0U7gDVb0t4VDGVao08",
                 //         url: "http://mmbiz.qpic.cn/mmbiz_jpg/Lvn9KoTyF6tGVQLg3QbOlwTn2thg2LmJI1WAxuZcCVqGGknKicrBQRLaWT3MSLEOVDvk0w4DpyJA5mq8k9CRNQw/0?wx_fmt=jpeg"
@@ -131,16 +136,16 @@ exports.reply = async function() {
                         "thumb_media_id": picData.media_id,
                         "author": "Scott",
                         "digest": "摘要没没写",
-                        "show_cover_pic": 1,
+                        "show_cover_pic": 0,
                         "content": "未完待续",
                         "content_source_url": "https://www.github.com"
                     }]
                 }
 
                 //上传永久图文素材
-                var data = await wechatApi.uploadMaterial("news", meida, {})
-                    // var data = { media_id: "e-kE-1ewjSyqA-TY46BTLusSqJwrMJBoJM-icnglFYY" }
-                    // console.log(data)
+                var data = await wechatApi.uploadMaterial("news", meida, {});
+                // var data = { media_id: "e-kE-1ewjSyqA-TY46BTLusSqJwrMJBoJM-icnglFYY" }
+                // console.log(data)
                 data = await wechatApi.fetchMaterial(data.media_id, 'news', {});
                 // console.log(data)
                 var items = data.news_item;
@@ -150,11 +155,28 @@ exports.reply = async function() {
                     news.push({
                         title: item.title,
                         description: item.digest,
-                        picUrl: item.url,
+                        picUrl: item.thumb_url,
                         url: item.url,
                     })
                 });
                 reply = news
+                    // console.log(news[0].url)
+                break;
+            case "b":
+                var picData = await wechatApi.uploadMaterial('pic', __dirname + '/2.jpg', {}); //获取url地址 不受素材数目的限制
+                // console.log(picData);
+                var news = []
+                news.push({
+                    title: "今日告警",
+                    description: "查看今日有什么报警",
+                    picUrl: picData.url,
+                    url: info.host + 'logs',
+                })
+                reply = news
+                break;
+
+            case 't':
+
                 break;
             default:
 

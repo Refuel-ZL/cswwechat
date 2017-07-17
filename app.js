@@ -11,6 +11,8 @@ var users = require('./routes/users')
 var tags = require('./routes/tags')
 var logs = require('./routes/logs')
 var menu = require('./routes/menu')
+var test = require('./routes/test')
+
 
 
 // error handler
@@ -42,6 +44,7 @@ app.use(users.routes(), users.allowedMethods())
 app.use(tags.routes(), tags.allowedMethods())
 app.use(logs.routes(), logs.allowedMethods())
 app.use(menu.routes(), menu.allowedMethods())
+app.use(test.routes(), test.allowedMethods())
 
 
 app.use(async(ctx) => {

@@ -2,8 +2,9 @@
 
 var request = require("request")
 var _ = require("lodash");
+var config = require("../config");
 
-var realm = "http://220.170.155.240:9619/"
+var realm = config.csw.host;
 var cswapi = {
     getvarvalue: realm + 'getvarvalue?',
     getalarmlog: realm + 'alarmlog?'
@@ -49,8 +50,7 @@ module.exports = {
 
 
     },
-    /** 
-     * getvarvalue 获取实时数据
+    /** getvarvalue 获取实时数据
      * meterial
      * 
      * @param {any} meterial 

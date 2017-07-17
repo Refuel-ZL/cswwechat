@@ -1,7 +1,7 @@
 const router = require('koa-router')()
 var Wechat = require('../wechat/wechat');
 var config = require('../config');
-var csw = require('../libs/csw');
+var csw = require('../csw/csw');
 var moment = require('moment-timezone');
 moment.tz.setDefault("Asia/Shanghai");
 router.prefix('/logs')
@@ -16,8 +16,6 @@ router.get('/', async(ctx, next) => {
         title: '今日告警',
         logs: lists
     })
-
-
 })
 
 // router.get('/:id', async function(ctx, next) {

@@ -36,7 +36,7 @@ var api = {
     },
     userset: {
         batchtagging: prefix + 'tags/members/batchtagging?', //批量用户增加标签
-        batchuntagging: prefix + 'members/batchuntagging?', //批量用户取消标签
+        batchuntagging: prefix + 'tags/members/batchuntagging?', //批量用户取消标签
         getidlist: prefix + 'tags/getidlist?', //获取用户身上的标签列表
         getusers: prefix + 'user/get?', //获取用户列表
         updateremark: prefix + 'user/info/updateremark?', //设置用户备注
@@ -44,6 +44,13 @@ var api = {
         getblacklist: prefix + 'tags/members/getblacklist?', //获取黑名单列表
         batchblacklist: prefix + 'tags/members/batchblacklist?', //用户拉黑
         batchunblacklist: prefix + 'tags/members/batchunblacklist?', //取消拉黑
+    },
+    message: {
+        sendall: prefix + "message/mass/sendall?", //依据标签进行群发
+        send: prefix + "message/mass/send?", //依据openID进行群发
+        delete: prefix + "message/mass/delete?", //删除群发
+        preview: prefix + "message/mass/preview?", //预览单独给某一个openid 100/天
+        getstatus: prefix + "message/mass/get?", //查询群发消息发送状态
     }
 
 }
@@ -272,6 +279,64 @@ Wechat.prototype.deleteTag = async function(tag_id) {
     })
 }
 
+/**为用户打上标签
+ * 
+ */
+Wechat.prototype.taggingUsersTag = async function(tag_id, openid_list) {
+    var that = this;
+    var data = await that.fetchAccessToken();
+    return new Promise(function(resolve, reject) {
+        var url = api.userset.batchtagging + 'access_token=' + data.access_token;
+        var body = {
+            openid_list: openid_list,
+            tagid: tag_id
+        }
+        var options = {
+            url: url,
+            method: "POST",
+            JSON: true,
+            body: JSON.stringify(body)
+        }
+        console.log(body)
+        console.log(options)
+        request(options, (err, res, body) => {
+            if (err) {
+                reject(err)
+            }
+            resolve(JSON.parse(body))
+        })
+    })
+}
+
+/**为用户去掉标签
+ * 
+ */
+Wechat.prototype.untaggingUsersTag = async function(tag_id, openid_list) {
+    var that = this;
+    var data = await that.fetchAccessToken();
+    return new Promise(function(resolve, reject) {
+        var url = api.userset.batchuntagging + 'access_token=' + data.access_token;
+        var body = {
+            openid_list: openid_list,
+            tagid: tag_id
+        }
+        var options = {
+            url: url,
+            method: "POST",
+            JSON: true,
+            body: JSON.stringify(body)
+        }
+        console.log(body)
+        console.log(options)
+        request(options, (err, res, body) => {
+            if (err) {
+                reject(err)
+            }
+            resolve(JSON.parse(body))
+        })
+    })
+}
+
 /**获取标签下的粉丝列表 */
 Wechat.prototype.fetchTagUsers = async function(tag_id, next_openid) {
     var that = this;
@@ -452,6 +517,7 @@ Wechat.prototype.uploadMaterial = async function(type, meterial, permanent) {
         } else {
             options.formData = form;
         }
+        console.log(options);
         try {
             request(options, (err, res, body) => {
                 var _data = JSON.parse(body);
@@ -545,6 +611,7 @@ Wechat.prototype.countMaterial = async function() {
     var that = this;
     var data = await that.fetchAccessToken();
     return new Promise(function(resolve, reject) {
+        var url = api.permanent.count + "access_token=" + data.access_token;
         var options = {
             method: 'GET',
             url: url,
@@ -599,6 +666,7 @@ Wechat.prototype.fetchMaterial = async function(mediaId, type, permanent) {
             }
         }
         options.url = url
+        console.log(url)
         if (type === "news" || type === "video") {
             request(options, (err, res, body) => {
                 if (err) {
@@ -640,7 +708,7 @@ Wechat.prototype.batchMaterial = async function(form) {
         var options = {
             method: 'POST',
             url: url,
-            body: form,
+            body: JSON.stringify(form),
             JSON: true
         }
         try {
@@ -687,6 +755,132 @@ Wechat.prototype.getUsers = async function() {
 /**设置用户备注名(仅服务号)
  * 
  */
+Wechat.prototype.setUserRemark = async function(openid, remark) {
+    var that = this;
+    var data = await that.fetchAccessToken();
+    return new Promise(function(resolve, reject) {
+        var url = api.userset.updateremark + 'access_token=' + data.access_token;
+        console.log(url);
+        try {
+            request({
+                url: url,
+                method: 'GET',
+                JSON: true,
+                body: JSON.stringify({
+                    "openid": openid,
+                    "remark": remark
+                })
+            }, (err, res, body) => {
+                if (err) {
+                    reject(err)
+                }
+                resolve(JSON.parse(body))
+            })
+        } catch (error) {
+            console.log(error)
+        }
+
+    })
+}
+
+/**根据标签id 群发
+ * 
+ */
+Wechat.prototype.sendAll = async function(tag_id, params) {
+    var that = this;
+    var data = await that.fetchAccessToken();
+    return new Promise(function(resolve, reject) {
+        var url = api.message.sendall + "access_token=" + data.access_token;
+        console.log(url);
+        var form = {
+            filter: {
+                is_to_all: false,
+                tag_id: tag_id
+            }
+        }
+        if (params.type === "mpnews") {
+            form.mpnews = {
+                media_id: params.media_id
+            }
+            form.msgtype = "mpnews";
+            form.send_ignore_reprint = 0;
+        } else if (params.type === "text") {
+            form.text = {
+                content: params.content
+            }
+            form.msgtype = "text";
+        } else if (params.type === "voice") {
+            form.voice = {
+                media_id: params.media_id
+            }
+            form.msgtype = "voice";
+        } else if (params.type === "image") {
+            form.image = {
+                media_id: params.media_id
+            }
+            form.msgtype = "image";
+        } else if (params.type === "mpvideo") {
+            form.mpvideo = {
+                media_id: params.media_id
+            }
+            form.msgtype = "mpvideo";
+        }
+        var options = {
+            url: url,
+            method: "POST",
+            JSON: true,
+            body: JSON.stringify(form)
+        }
+        console.log(form)
+        console.log(options);
+        // resolve("测试")
+        try {
+            request(options, (err, res, body) => {
+                if (err) {
+                    reject(err)
+                }
+                resolve(JSON.parse(body))
+            })
+        } catch (error) {
+            console.log(error)
+        }
+
+    })
+}
+
+/**根据群发id 返回发送状态
+ * 
+ */
+Wechat.prototype.getSendStatus = async function(msgid) {
+    var that = this;
+    var data = await that.fetchAccessToken();
+    return new Promise(function(resolve, reject) {
+        var url = api.message.getstatus + "access_token=" + data.access_token;
+        console.log(url);
+        var options = {
+            url: url,
+            method: "POST",
+            JSON: true,
+            body: JSON.stringify({
+                msg_id: msgid
+            })
+        }
+        console.log(options);
+        // resolve("测试")
+        try {
+            request(options, (err, res, body) => {
+                if (err) {
+                    reject(err)
+                }
+                resolve(JSON.parse(body))
+            })
+        } catch (error) {
+            console.log(error)
+        }
+
+    })
+}
+
 
 /** 打包xml 返回发送信息
  * 
