@@ -25,7 +25,7 @@ router.get('/create/:name', async function(ctx, next) {
 })
 
 /**
- * 创建标签
+ * 更新标签
  */
 router.post('/update', async function(ctx, next) {
     /**GET  */

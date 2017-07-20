@@ -31,9 +31,7 @@ var config = {
             data = JSON.stringify(data);
             return util.writeFileAsync(wechat_flie, data);
         }
-    },
-    csw: {
-        host: "http://220.170.155.240:9619/"
     }
+
 }
 module.exports = config

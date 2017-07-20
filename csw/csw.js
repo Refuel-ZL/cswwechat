@@ -1,30 +1,49 @@
 'use strict'
 
+
 var request = require("request")
 var _ = require("lodash");
 var config = require("../config");
 
-var realm = config.csw.host;
+var realm = "http://220.170.155.240:9619/"
 var cswapi = {
     getvarvalue: realm + 'getvarvalue?',
-    getalarmlog: realm + 'alarmlog?'
+    getalarmlog: realm + 'alarmlog?',
+    setvarvalue: realm + "setvarvalue?"
 }
 module.exports = {
     getvarvalue: async function(meterial) {
         var url = cswapi.getvarvalue + 'varlist=' + JSON.stringify(meterial);
         var options = {
-            method: 'GET',
+            method: 'POST',
             url: url,
-            JSON: true
+            JSON: true,
         };
         return new Promise((resolve, reject) => {
-            request(options, (err, res, body) => {
+            request.post(options, (err, res, body) => {
                 if (err) {
                     reject(err);
                 }
                 resolve(JSON.parse(body));
             });
         });
+    },
+    setvarvalue: async function(meterial) {
+        var url = cswapi.setvarvalue + 'varlist=' + JSON.stringify(meterial);
+        var options = {
+            method: 'POST',
+            url: url,
+            JSON: true,
+        };
+        return new Promise((resolve, reject) => {
+            request(options, (err, res, body) => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve(body);
+            });
+        })
+
     },
     getalarmlog: async function(from, end, isLog, size) {
         var url = cswapi.getalarmlog + 'from=' + from + '&end=' + end + '&isLog=' + isLog + '&size=' + size;
@@ -50,30 +69,4 @@ module.exports = {
 
 
     },
-    /** getvarvalue 获取实时数据
-     * meterial
-     * 
-     * @param {any} meterial 
-     */
-    getvarvalue: async function(meterial) {
-        return new Promise(function(resolve, reject) {
-            var url = cswapi.getvarvalue + 'varlist=' + JSON.stringify(meterial);
-            var options = {
-                method: 'GET',
-                url: url,
-                JSON: true
-            }
-            request(options, (err, res, body) => {
-                if (err) {
-                    reject(err);
-                }
-                if (body) {
-                    resolve(JSON.parse(body));
-                } else {
-                    resolve(body);
-                }
-
-            });
-        })
-    }
 }

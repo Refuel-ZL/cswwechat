@@ -25,14 +25,14 @@ exports.formatMessage = function(result) {
             if (item.length === 1) {
                 var val = item[0];
                 if (typeof val === "object") {
-                    message[keys] = formatMessage(val);
+                    message[keys] = this.formatMessage(val);
                 } else {
                     message[key] = (val || '').trim()
                 }
             } else {
                 message[key] = []
                 for (var j = 0, k = item.length; j < k; j++) {
-                    message[key].push(formatMessage(item[j]))
+                    message[key].push(this.formatMessage(item[j]))
                 }
             }
 

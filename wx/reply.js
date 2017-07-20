@@ -6,6 +6,8 @@ var Wechat = require('../wechat/wechat');
 var csw = require('../csw/csw');
 var menu = require('./menu');
 var moment = require('moment-timezone');
+var rule = require('../csw/rule');
+
 moment.tz.setDefault("Asia/Shanghai");
 
 // var wechatApi = new Wechat(config.wechat);
@@ -15,7 +17,7 @@ moment.tz.setDefault("Asia/Shanghai");
 exports.reply = async function() {
     var wechatApi = new Wechat(config.wechat);
     var message = this.weixin;
-    var vvv = '支持命令如下:\n 查询某id值：#id'
+    var vvv = '支持关键字如下:\n' + rule.keyword
     var reply = vvv;
     console.log(moment().format("X"))
     if (message.MsgType === 'event') {
@@ -179,9 +181,106 @@ exports.reply = async function() {
 
                 break;
             default:
-
+                var res = await _command(content, message.FromUserName)
+                if (res.state === 1) {
+                    reply = res.val + " " + res.msg;
+                } else {
+                    reply = res.msg
+                }
                 break;
         }
+    } else if (message.MsgType === 'voice') {
+        var say = message.Recognition;
+        console.log(say)
+        if (say.length > 0) {
+            var res = await _command(say, message.FromUserName)
+            if (res.state === 1) {
+                reply = res.val + " " + res.msg;
+            } else if (res.state === 2) {
+                reply = res.msg
+            } else {
+                reply = "【" + res.val + "】\n" + res.msg;
+            }
+        } else {
+            reply = "未识别到信息,请确保语音输入有效.重试还不能解决请联系管理员打开语音识别接口"
+        }
+
+    } else {
+        reply = "抱歉！ 未添加该类型的回复策略"
     }
     this.body = reply;
+}
+
+var keywords = rule.keyword;
+
+/**
+ * 匹配指令
+ * 
+ * @param {String} val 
+ * @returns 
+ */
+function matching(val) {
+    var result = {
+        state: 0,
+        val: ""
+    }
+
+    for (var i = 0; i < keywords.length; i++) {
+        if (val.indexOf(keywords[i]) >= 0) {
+            result = {
+                state: 1,
+                val: keywords[i]
+            }
+            break;
+        }
+    }
+    return result
+}
+
+/**核实用户权限
+ * 
+ * @param {Array} items 权限组
+ * @param {String} val  用户
+ * @returns 
+ */
+function _matching_id(items, val) {
+    var result = false;
+    for (var i = 0; i < items.length; i++) {
+        if (items[i] === val) {
+            result = true;
+            break;
+        }
+    }
+    return result
+}
+
+/**
+ * 
+ * 
+ */
+async function _command(_msg, Uid) {
+    var cswdic = matching(_msg)
+    if (cswdic.state === 1) {
+        var policy = rule[cswdic.val];
+        if (_matching_id(policy.openid, Uid)) {
+            return {
+                state: 1,
+                val: cswdic.val,
+                msg: await policy.event()
+            }
+
+        } else {
+            return {
+                state: 2,
+                msg: "抱歉！ 您没有执行这条指令的权限"
+            }
+        }
+
+    } else {
+        return {
+            state: 0,
+            val: _msg,
+            msg: "抱歉！ 我无法识别您的指令且不能完成"
+        }
+    }
 }

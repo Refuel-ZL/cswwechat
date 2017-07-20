@@ -2,6 +2,7 @@ const router = require('koa-router')()
 var Wechat = require('../wechat/wechat');
 var config = require('../config');
 var request = require("request")
+var cswapi = require("../csw/csw");
 
 router.prefix('/test')
 
@@ -61,4 +62,10 @@ router.get("/sendAll", async function(ctx, next) {
 router.get("/getstatus/:id", async(ctx, next) => {
     ctx.body = await wechatApi.getSendStatus(ctx.params.id)
 })
+
+router.get("/aaaa", async(ctx, next) => {
+    ctx.body = await cswapi.setvarvalue();
+})
+
+
 module.exports = router

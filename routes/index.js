@@ -40,4 +40,17 @@ router.post('/loadMenu', async(ctx, next) => {
     }
     ctx.body = reply;
 })
+
+/**开放群发接口
+ * 
+ */
+router.post("/sendtextall", async function(ctx, next) {
+    var tagid = ctx.request.body.tagid || 100
+    var val = {
+        type: "text",
+        content: ctx.request.body.content,
+    }
+    ctx.body = await wechatApi.sendAll(tagid, val);
+})
+
 module.exports = router
