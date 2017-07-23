@@ -45,9 +45,8 @@ router.post("/delete", async(ctx, next) => {
 })
 
 /**获取标签下粉丝 */
-router.post("/getusers", async(ctx, next) => {
-    // var tagid = ctx.query.tagid;
-    var tagid = ctx.request.body.tagid;
+router.all("/getusers", async(ctx, next) => {
+    var tagid = ctx.query.tagid || ctx.request.body.tagid;
     ctx.body = await wechatApi.fetchTagUsers(tagid);
 })
 

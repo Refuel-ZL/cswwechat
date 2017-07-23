@@ -1,76 +1,31 @@
 "use strict"
 
-var info = require('../package')
-
-/*
 module.exports = {
     "button": [{
-        "name": "点击事件",
-        "type": "click",
-        "key": "menu_click"
+        "type": 'click',
+        'name': '今日告警',
+        "key": "_alarmlog"
     }, {
-        "name": "点出菜单",
+        "name": "报警日志",
         "sub_button": [{
-            "type": "view",
-            "name": "跳转URL",
-            "url": "http://uc123.com"
+            "name": "今日日志",
+            "type": "click",
+            "key": "alarmlog"
         }, {
-            "type": "scancode_push",
-            "name": "扫码推送事件",
-            "key": "qr_scan"
-        }, {
-            "type": "pic_sysphoto",
-            "name": "弹出系统拍照",
-            "key": "pic_sysphoto",
-        }, {
-            "type": "pic_photo_or_album",
-            "name": "弹出拍照或者相册",
-            "key": "pic_photo_album",
-        }, {
-            "type": "scancode_waitmsg",
-            "name": "扫码带提示",
-            "key": "qr_scan_waitmsg",
+            "name": "昨日top10",
+            "type": "click",
+            "key": "alarmlog10"
         }]
     }, {
-        "name": "点出菜单2",
+        'name': '攻略',
         "sub_button": [{
-            "type": "pic_weixin",
-            "name": "微信相册发图",
-            "key": "pic_weixin"
+            "type": 'click',
+            'name': '指令列表',
+            "key": "dictatelist"
         }, {
-            "name": "定位",
-            "type": "location_select",
-            "key": "location_select"
+            "type": 'click',
+            'name': '关于',
+            "key": "about"
         }]
     }]
-}*/
-module.exports = {
-    "button": [
-        //     {
-        //     "name": "点击事件",
-        //     "type": "click",
-        //     "key": "menu_click"
-        // },
-        // {
-        //     "type": 'view',
-        //     'name': '今日告警',
-        //     "url": info.host + 'logs'
-        // }, 
-        {
-            "type": 'click',
-            'name': '今日告警',
-            "key": "_alarmlog"
-        }, {
-            "name": "报警日志",
-            "sub_button": [{
-                "name": "今日日志",
-                "type": "click",
-                "key": "alarmlog"
-            }, {
-                "name": "昨日top10",
-                "type": "click",
-                "key": "alarmlog10"
-            }]
-        }
-    ]
 }

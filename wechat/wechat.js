@@ -4,6 +4,7 @@ var fs = require('fs');
 var _ = require("lodash");
 var request = require("request")
 
+const logUtil = require('../utils/log4js/log_utils');
 var prefix = "https://api.weixin.qq.com/cgi-bin/";
 var api = {
     accessToken: prefix + "token?grant_type=client_credential",
@@ -517,20 +518,17 @@ Wechat.prototype.uploadMaterial = async function(type, meterial, permanent) {
         } else {
             options.formData = form;
         }
-        console.log(options);
-        try {
-            request(options, (err, res, body) => {
-                var _data = JSON.parse(body);
-                if (_data) {
-                    resolve(_data)
-                } else {
-                    throw new Error('upload meaterial fails');
-                }
-            })
-        } catch (error) {
-            console.log(err)
-        }
-
+        request(options, (err, res, body) => {
+            if (err) {
+                resolve(err)
+            }
+            var _data = JSON.parse(body);
+            if (_data) {
+                resolve(_data)
+            } else {
+                throw new Error('upload meaterial fails');
+            }
+        })
     })
 }
 
@@ -892,6 +890,6 @@ Wechat.prototype.reply = function() {
     this.status = 200;
     this.type = 'application/xml';
     this.body = xml;
-    console.log(this.body)
+    logUtil.writeInfo(message.FromUserName + "  将收到信息——" + xml)
 }
 module.exports = Wechat
