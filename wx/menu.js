@@ -2,8 +2,8 @@
 
 module.exports = {
     "button": [{
-        "type": 'click',
-        'name': '今日告警',
+        "type": "click",
+        "name": "今日告警",
         "key": "_alarmlog"
     }, {
         "name": "报警日志",
@@ -17,14 +17,14 @@ module.exports = {
             "key": "alarmlog10"
         }]
     }, {
-        'name': '攻略',
+        "name": "攻略",
         "sub_button": [{
-            "type": 'click',
-            'name': '指令列表',
+            "type": "click",
+            "name": "指令列表",
             "key": "dictatelist"
         }, {
-            "type": 'click',
-            'name': '关于',
+            "type": "click",
+            "name": "关于",
             "key": "about"
         }]
     }]

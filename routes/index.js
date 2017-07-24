@@ -1,44 +1,48 @@
-var wechat = require('../wechat/g')
-var Wechat = require('../wechat/wechat');
-const router = require('koa-router')()
-var config = require("../config");
-var reply = require("../wx/reply");
+"use strict"
+var wechat = require("../wechat/g")
+var Wechat = require("../wechat/wechat")
+const router = require("koa-router")()
+var config = require("../config")
+var reply = require("../wx/reply")
 
-var wechatApi = new Wechat(config.wechat);
-router.get('/', async(ctx, next) => {
-    await ctx.render('index', {
-        title: 'Hello Koa 2!'
+var wechatApi = new Wechat(config.wechat)
+router.get("/", async(ctx, next) => {
+    await ctx.render("index", {
+        title: "Hello Koa 2!"
     })
+    await next()
 })
 
-router.all('/wx', wechat(config.wechat, reply.reply))
+router.all("/wx", wechat(config.wechat, reply.reply))
 
-router.get('/json', async(ctx, next) => {
+router.get("/json", async(ctx, next) => {
     ctx.body = {
-        title: 'koa2 json'
+        title: "koa2 json"
     }
+    await next()
+
 })
 
-router.post('/loadMenu', async(ctx, next) => {
-    var reply = '';
+router.post("/loadMenu", async(ctx, next) => {
+    var reply = ""
     try {
-        var del = await wechatApi.deleteMenu();
-        if (del.errmsg = 'ok') {
-            del = await wechatApi.createMenu(ctx.request.body.text);
-            if (del.errmsg === 'ok') {
-                reply = '重置菜单成功'
+        var del = await wechatApi.deleteMenu()
+        if (del.errmsg === "ok") {
+            del = await wechatApi.createMenu(ctx.request.body.text)
+            if (del.errmsg === "ok") {
+                reply = "重置菜单成功"
             } else {
-                reply = '写入失败：' + del
+                reply = "写入失败：" + del
             }
         } else {
-            reply = '重置失败' + del
+            reply = "重置失败" + del
         }
 
     } catch (error) {
-        reply = '重置失败'
-        console.log(error)
+        reply = "重置失败" + JSON.stringify(error)
     }
-    ctx.body = reply;
+    ctx.body = reply
+    await next()
 })
 
 /**开放群发接口
@@ -50,7 +54,9 @@ router.post("/sendtextall", async function(ctx, next) {
         type: "text",
         content: ctx.request.body.content,
     }
-    ctx.body = await wechatApi.sendAll(tagid, val);
+    ctx.body = await wechatApi.sendAll(tagid, val)
+    await next()
+
 })
 
 module.exports = router

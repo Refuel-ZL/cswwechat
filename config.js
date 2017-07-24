@@ -1,9 +1,8 @@
-'use strict'
+"use strict"
 
-var path = require("path");
-var util = require("./libs/util");
-const fs = require('fs');
-var wechat_flie = path.join(__dirname, './config/wechat.json');
+var path = require("path")
+var util = require("./libs/util")
+var wechat_flie = path.join(__dirname, "./config/wechat.json")
 
 var config = {
     greetings: "你好，欢迎关注湖南康森韦尔科技园",
@@ -23,8 +22,8 @@ var config = {
             return util.readFileAsync(wechat_flie)
         },
         saveAccessToken: function(data) {
-            data = JSON.stringify(data);
-            return util.writeFileAsync(wechat_flie, data);
+            data = JSON.stringify(data)
+            return util.writeFileAsync(wechat_flie, data)
         }
     }
 
@@ -41,8 +40,8 @@ var proconfig = {
             return util.readFileAsync(wechat_flie)
         },
         saveAccessToken: function(data) {
-            data = JSON.stringify(data);
-            return util.writeFileAsync(wechat_flie, data);
+            data = JSON.stringify(data)
+            return util.writeFileAsync(wechat_flie, data)
         }
     }
 }
@@ -50,5 +49,6 @@ var proconfig = {
 
 
 
-exports = module.exports = config;
-// exports = module.exports = proconfig; //如果是线上，使用该config
+exports = module.exports = config
+
+// exports = module.exports = proconfig //如果是线上，使用该config

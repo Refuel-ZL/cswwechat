@@ -1,12 +1,12 @@
-'use strict';
-const path = require('path');
-const fs = require('fs');
-let isexist = void 0;
+"use strict"
+const path = require("path")
+const fs = require("fs")
+let isexist = void 0
 
-let LogPath = path.resolve(__dirname, "../logs/log.log");
-isexist = fs.existsSync('../logs');
+let LogPath = path.resolve(__dirname, "../logs/log.log")
+isexist = fs.existsSync("../logs")
 if (!isexist) {
-    fs.mkdirSync('../logs', '0777');
+    fs.mkdirSync("../logs", "0777")
 }
 module.exports = {
     "appenders": {
