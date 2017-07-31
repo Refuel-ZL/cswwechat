@@ -30,6 +30,7 @@ var server = http.createServer(app.callback())
  */
 
 server.listen(port)
+logUtil.writeDebug("监听端口" + port)
 server.on("error", onError)
 server.on("listening", onListening)
 

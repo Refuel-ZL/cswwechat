@@ -10,7 +10,7 @@ var cswapi = {
     getalarmlog: realm + "alarmlog?",
     setvarvalue: realm + "setvarvalue?"
 }
-var timeout = 2000
+var timeout = 3000
 module.exports = {
     getvarvalue: function(meterial) {
         var url = cswapi.getvarvalue + "varlist=" + JSON.stringify(meterial)
@@ -22,12 +22,20 @@ module.exports = {
             timeout: timeout
         }
         return new Promise((resolve) => {
-            request(options, (err, res, body) => {
-                if (err) {
-                    resolve(err)
-                }
-                resolve(JSON.parse(body))
-            })
+            try {
+                var t1 = new Date()
+                request(options, (err, res, body) => {
+                    logUtil.writeInfo("获取实时数据值花费时间 【" + (new Date() - t1) + "ms】")
+                    if (err) {
+                        logUtil.writeErr("获取实时数据值失败 " + err)
+                        resolve(err)
+                    }
+                    resolve(JSON.parse(body))
+                })
+            } catch (error) {
+                throw new Error("Get Varvalue ")
+            }
+
         })
     },
     setvarvalue: function(meterial) {
@@ -40,13 +48,22 @@ module.exports = {
             timeout: timeout
 
         }
+
         return new Promise((resolve) => {
-            request(options, (err, res, body) => {
-                if (err) {
-                    resolve(err)
-                }
-                resolve(body)
-            })
+            try {
+                var t2 = new Date()
+                request(options, (err, res, body) => {
+                    logUtil.writeInfo("设置数据值花费时间 【" + (new Date() - t2) + "ms】")
+                    if (err) {
+                        logUtil.writeErr("设置数据值失败 " + err)
+                        resolve(err)
+                    }
+                    resolve(body)
+                })
+            } catch (error) {
+                throw new Error("Set Varvalue ")
+            }
+
         })
 
     },
@@ -59,19 +76,26 @@ module.exports = {
             JSON: true,
             timeout: timeout
         }
-        var t = new Date()
+        var t3 = new Date()
         return new Promise((resolve) => {
-            request(options, (err, res, body) => {
-                logUtil.writeInfo("获取告警信息花费时间 【" + (new Date() - t) + "ms】")
-                if (err) {
-                    resolve(err)
-                }
-                if (body) {
-                    resolve(JSON.parse(body))
-                } else {
-                    resolve(body)
-                }
-            })
+            try {
+                request(options, (err, res, body) => {
+                    logUtil.writeInfo("获取告警信息花费时间 【" + (new Date() - t3) + "ms】")
+                    if (err) {
+                        logUtil.writeErr("获取日志失败 " + err)
+                        resolve(err)
+                    }
+                    if (body) {
+                        resolve(JSON.parse(body))
+                    } else {
+                        resolve(body)
+                    }
+                })
+            } catch (error) {
+                throw new Error("Get Alarmlog ")
+
+            }
+
         })
     },
 }

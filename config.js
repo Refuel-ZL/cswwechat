@@ -30,8 +30,8 @@ var config = {
 }
 var proconfig = {
     greetings: "你好，欢迎关注湖南康森韦尔科技园",
-    host: "http://66.112.212.6/",
-    port: "80",
+    host: " http://cswwxchat.tunnel.echomod.cn/",
+    port: "3030",
     wechat: {
         appID: "wxeb05d253a32466a8",
         appSecret: "39b47ebeeead0e5ff09b5c360bf17226",

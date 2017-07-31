@@ -13,7 +13,7 @@ module.exports = {
         "cheese": {
             "type": "file",
             "filename": LogPath,
-            "maxLogSize": "204800",
+            "maxLogSize": 2 * 1024 * 1024 * 1000,
             "backups": 10
         },
         "con": {

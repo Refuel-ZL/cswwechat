@@ -7,6 +7,7 @@ var Wechat = require("./wechat")
 
 module.exports = function(opts, handler) {
     var wechat = new Wechat(opts)
+    wechat.fetchAccessToken()
     return async(ctx, next) => {
         var token = config.wechat.token
         var signature = ctx.query.signature
@@ -19,12 +20,11 @@ module.exports = function(opts, handler) {
             if (sha === signature) {
                 ctx.body = echostr + ""
             } else {
-                ctx.body = "wrong"
+                ctx.body = "GET--非微信服务器发来请求 "
             }
         } else if (ctx.method === "POST") {
             if (sha !== signature) {
-                ctx.body = "wrong"
-
+                ctx.body = "POST--非微信服务器发来请求 "
             } else {
                 var data = await getRawBody(ctx.req, {
                     length: ctx.length,
@@ -33,7 +33,6 @@ module.exports = function(opts, handler) {
                 })
                 var content = await util.parseXMLAsync(data)
                 var message = util.formatMessage(content.xml)
-
                 ctx.weixin = message
                 await handler.call(ctx)
                 wechat.reply.call(ctx)

@@ -87,6 +87,13 @@ exports.reply = async function() {
         } else if (message.Event === "unsubscribe") {
             logUtil.writeInfo(message.FromUserName + "  事件——取消公众号")
             reply = "取消关注"
+        } else if (message.Event === "MASSSENDJOBFINISH") {
+            logUtil.writeInfo("事件——群发结果事件" + JSON.stringify(message))
+            reply = ""
+        } else if (message.Event === "TEMPLATESENDJOBFINISH") {
+            // logUtil.writeInfo("事件——模板结果事件" + JSON.stringify(message))
+            logUtil.writeInfo("事件——模板发送结果事件  【" + message.FromUserName + "】结果：" + message.Status)
+            reply = ""
         } else {
             logUtil.writeInfo(message.FromUserName + "  事件——无效事件")
             reply = "无效事件"
@@ -202,12 +209,12 @@ exports.reply = async function() {
         logUtil.writeInfo(message.FromUserName + "  语音输入——【" + say + "】")
         if (say.length > 0) {
             var rse_ = await _command(say, message.FromUserName)
-            if (rse_.state === 1) {
+            if (rse_.state === 1) { //执行完成
                 reply = rse_.val + " " + rse_.msg
-            } else if (rse_.state === 2) {
+            } else if (rse_.state === 2) { //权限不足
                 reply = rse_.msg
-            } else {
-                reply = "【" + rse_.val + "】\n" + rse_.msg
+            } else { //非法指令
+                reply = "【" + say + "】\n" + rse_.msg
             }
         } else {
             reply = "未识别到信息,请确保语音输入有效.重试还不能解决请联系管理员打开语音识别接口"
@@ -280,15 +287,18 @@ async function _command(_msg, Uid) {
                 }
             }
         }
+        var msg_ = await policy.event()
+        if (msg_ === "ok") {
+            msg_ = "指令已送达"
+        }
         return {
             state: 1,
             val: cswdic.val,
-            msg: await policy.event()
+            msg: msg_
         }
     } else {
         return {
             state: 0,
-            val: _msg,
             msg: "抱歉！ 我无法识别您的指令且不能完成"
         }
     }

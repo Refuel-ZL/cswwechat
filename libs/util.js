@@ -10,8 +10,10 @@ exports.readFileAsync = function(fpath, encoding) {
                     if (err) reject(err)
                     else resolve(content)
                 })
+            } else {
+                resolve("没有配置文件")
             }
-            resolve("没有配置文件")
+
         })
 
     })

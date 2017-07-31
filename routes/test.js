@@ -5,6 +5,9 @@ var Wechat = require("../wechat/wechat")
 var config = require("../config")
 var request = require("request")
 var cswapi = require("../csw/csw")
+var moment = require("moment-timezone")
+
+moment.tz.setDefault("Asia/Shanghai")
 
 router.prefix("/test")
 
@@ -69,6 +72,11 @@ router.get("/getstatus/:id", async(ctx, next) => {
 
 router.get("/aaaa", async(ctx, next) => {
     ctx.body = await cswapi.setvarvalue()
+    await next()
+})
+
+router.get("/template", async(ctx, next) => {
+    ctx.body = await wechatApi.Getallprivatetemplate()
     await next()
 })
 

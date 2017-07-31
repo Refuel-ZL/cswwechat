@@ -52,6 +52,14 @@ var api = {
         delete: prefix + "message/mass/delete?", //删除群发
         preview: prefix + "message/mass/preview?", //预览单独给某一个openid 100/天
         getstatus: prefix + "message/mass/get?", //查询群发消息发送状态
+    },
+    template: {
+        setindustry: prefix + "template/api_set_industry?", //设置所属行业
+        getindustry: prefix + "template/api_get_industry?", //获取所属行业
+        addtemplate: prefix + "template/api_add_template?", //获取模板ID
+        getallprivatetemplate: prefix + "template/get_all_private_template?", //获取模板列表
+        delprivatetemplate: prefix + "template/del_private_template?", //删除模板
+        sendtemplate: prefix + "message/template/send?", //发送模板信息
     }
 
 }
@@ -65,7 +73,7 @@ function Wechat(opts) {
     this.appSecret = opts.appSecret
     this.getAccessToken = opts.getAccessToken
     this.saveAccessToken = opts.saveAccessToken
-    this.fetchAccessToken()
+
 }
 /**获取/更新微信接口 token
  * fetchAccessToken()
@@ -103,7 +111,7 @@ Wechat.prototype.isValidAccessToken = function(data) {
     if (!data || !data.access_token || !data.expires_in) {
         return false
     }
-    var expires_in = data.expires_ins
+    var expires_in = data.expires_in
     var now = (new Date().getTime())
     if (now < expires_in) {
         return true
@@ -121,17 +129,22 @@ Wechat.prototype.updateAccessToken = function() {
     var appSecret = this.appSecret
     var url = api.accessToken + "&appid=" + appID + "&secret=" + appSecret
     return new Promise(function(resolve, reject) {
-
-        request({ url: url, JSON: true }, (err, res, body) => {
-            if (err) {
-                reject(err)
-            }
-            var data = JSON.parse(body)
-            var now = (new Date().getTime())
-            var expires_in = now + (data.expires_in - 50) * 1000
-            data.expires_in = expires_in
-            resolve(data)
-        })
+        try {
+            request({ url: url, JSON: true }, (err, res, body) => {
+                if (err) {
+                    logUtil.writeErr("请求access_token失败 " + err)
+                    reject(err)
+                }
+                logUtil.writeInfo("请求access_token结果 " + body)
+                var data = JSON.parse(body)
+                var now = (new Date().getTime())
+                var expires_in = now + (data.expires_in - 50) * 1000
+                data.expires_in = expires_in
+                resolve(data)
+            })
+        } catch (error) {
+            throw new Error("Update Access_Token")
+        }
     })
 
 }
@@ -399,12 +412,19 @@ Wechat.prototype.createMenu = async function(menu) {
         }
         try {
             request(options, (err, res, body) => {
+                if (err) {
+                    logUtil.writeErr("创建菜单失败 " + err)
+                    reject(err)
+                }
+                logUtil.writeInfo("创建菜单 " + body)
                 var _data = JSON.parse(body)
                 resolve(_data)
             })
         } catch (error) {
-            reject(error)
+            throw new Error("create Menu ")
         }
+
+
     })
 }
 
@@ -764,7 +784,7 @@ Wechat.prototype.setUserRemark = async function(openid, remark) {
 /**根据标签id 群发
  * 
  */
-Wechat.prototype.sendAll = async function(tag_id, params) {
+Wechat.prototype.sendAll = async function(params, tag_id) {
     var that = this
     var data = await that.fetchAccessToken()
     return new Promise(function(resolve, reject) {
@@ -772,8 +792,12 @@ Wechat.prototype.sendAll = async function(tag_id, params) {
         var form = {
             filter: {
                 is_to_all: false,
-                tag_id: tag_id
             }
+        }
+        if (!tag_id) {
+            form.filter.is_to_all = true
+        } else {
+            form.filter.tag_id = tag_id
         }
         if (params.type === "mpnews") {
             form.mpnews = {
@@ -808,12 +832,19 @@ Wechat.prototype.sendAll = async function(tag_id, params) {
             JSON: true,
             body: JSON.stringify(form)
         }
-        request(options, (err, res, body) => {
-            if (err) {
-                reject(err)
-            }
-            resolve(JSON.parse(body))
-        })
+        try {
+            request(options, (err, res, body) => {
+                if (err) {
+                    logUtil.writeErr("群发失败 " + err)
+                    reject(err)
+                }
+                logUtil.writeInfo("群发返回 " + body)
+                resolve(JSON.parse(body))
+            })
+        } catch (error) {
+            throw new Error("sendAll")
+        }
+
 
 
     })
@@ -846,6 +877,118 @@ Wechat.prototype.getSendStatus = async function(msgid) {
     })
 }
 
+/**获取模板列表
+ * 
+ */
+Wechat.prototype.Getallprivatetemplate = async function() {
+    var that = this
+    var data = await that.fetchAccessToken()
+    return new Promise(function(resolve, reject) {
+        var url = api.template.getallprivatetemplate + "access_token=" + data.access_token
+        var options = {
+            url: url,
+            method: "POST",
+            JSON: true,
+        }
+        try {
+            request(options, (err, res, body) => {
+                if (err) {
+                    reject(err)
+                }
+                resolve(JSON.parse(body))
+            })
+        } catch (error) {
+            throw new Error("Get all private template")
+        }
+    })
+}
+
+/**获取模板ID
+ * 
+ */
+Wechat.prototype.Addtemplate = async function(id) {
+    var that = this
+    var data = await that.fetchAccessToken()
+    return new Promise(function(resolve, reject) {
+        var url = api.template.addtemplate + "access_token=" + data.access_token
+        var options = {
+            url: url,
+            method: "POST",
+            JSON: true,
+            body: JSON.stringify({ template_id_short: id })
+        }
+        try {
+            request(options, (err, res, body) => {
+                if (err) {
+                    reject(err)
+                }
+                resolve(JSON.parse(body))
+            })
+        } catch (error) {
+            throw new Error("Add template")
+        }
+    })
+}
+
+/**删除模板
+ * 
+ */
+Wechat.prototype.Delprivatetemplate = async function(id) {
+    var that = this
+    var data = await that.fetchAccessToken()
+    return new Promise(function(resolve, reject) {
+        var url = api.template.delprivatetemplate + "access_token=" + data.access_token
+        var options = {
+            url: url,
+            method: "POST",
+            JSON: true,
+            body: JSON.stringify({ "template_id": id })
+        }
+        try {
+            request(options, (err, res, body) => {
+                if (err) {
+                    reject(err)
+                }
+                resolve(JSON.parse(body))
+            })
+        } catch (error) {
+            throw new Error("Del private template")
+        }
+    })
+}
+
+/**发送模板信息
+ * 
+ */
+Wechat.prototype.Sendtemplate = async function(data_) {
+    var that = this
+    var data = await that.fetchAccessToken()
+    return new Promise(function(resolve, reject) {
+        var url = api.template.sendtemplate + "access_token=" + data.access_token
+        var options = {
+            url: url,
+            method: "POST",
+            JSON: true,
+            body: JSON.stringify(data_)
+        }
+        try {
+            request(options, (err, res, body) => {
+                if (err) {
+                    logUtil.writeErr("发送模板信息失败 " + err)
+                    reject(err)
+                }
+                logUtil.writeInfo("发送模板信息结果 " + err)
+                resolve(JSON.parse(body))
+            })
+        } catch (error) {
+            throw new Error("Send template")
+        }
+    })
+
+
+
+
+}
 
 /** 打包xml 返回发送信息
  * 

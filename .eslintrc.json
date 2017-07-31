@@ -19,7 +19,7 @@
     "parser": "babel-eslint",
     "rules": {
         "indent": [
-            "warn",
+            0,
             4
         ],
         "linebreak-style": [
