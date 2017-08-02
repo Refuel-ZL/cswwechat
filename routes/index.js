@@ -70,12 +70,12 @@ router.all("/sendtemplate", async(ctx, next) => {
         var parameter = ctx.query.msg || ctx.request.body.msg
         logUtil.writeInfo("接收到模板信息" + parameter)
         parameter = JSON.parse(parameter)
-        var template_id = rule.idlist[parameter.type].template
-        var idlist = rule.idlist[parameter.type].group
-        if (template_id && idlist) {
-            for (var index = 0; index < idlist.length; index++) {
+        var template_id = rule.SmsTemplate[parameter.type].template
+        var SmsTemplate = rule.SmsTemplate[parameter.type].group
+        if (template_id && SmsTemplate) {
+            for (var index = 0; index < SmsTemplate.length; index++) {
                 var data_ = {
-                    "touser": idlist[index],
+                    "touser": SmsTemplate[index],
                     "template_id": template_id,
                     "data": {
                         "text": {

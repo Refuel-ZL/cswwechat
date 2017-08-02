@@ -27,10 +27,10 @@ module.exports = {
                 request(options, (err, res, body) => {
                     logUtil.writeInfo("获取实时数据值花费时间 【" + (new Date() - t1) + "ms】")
                     if (err) {
-                        logUtil.writeErr("获取实时数据值失败 " + err)
+                        logUtil.writeErr("获取实时数据值失败 " + JSON.stringify(err))
                         resolve(err)
                     }
-                    resolve(JSON.parse(body))
+                    resolve(body)
                 })
             } catch (error) {
                 throw new Error("Get Varvalue ")

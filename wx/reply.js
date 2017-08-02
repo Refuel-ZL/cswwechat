@@ -73,7 +73,7 @@ exports.reply = async function() {
                 case "dictatelist":
                     reply = "现支持如下指令："
                     keywords.forEach(function(item, index) {
-                        reply += "\n【" + index + "】" + item
+                        reply += "\n【" + index + "】" + item + " (" + rule.data[item].remark + ")"
                     })
                     break
                 case "about":
@@ -188,19 +188,10 @@ exports.reply = async function() {
                 break
             default:
                 var key = keywords[content]
-                var res = {
-                    state: 0,
-                    msg: ""
-                }
                 if (key) {
-                    res = await _command(key, message.FromUserName)
+                    reply = await carryout(key, message.FromUserName) //序号
                 } else {
-                    res = await _command(content, message.FromUserName)
-                }
-                if (res.state === 1) {
-                    reply = res.val + " " + res.msg
-                } else {
-                    reply = res.msg
+                    reply = await carryout(content, message.FromUserName) //模糊指令
                 }
                 break
         }
@@ -208,16 +199,9 @@ exports.reply = async function() {
         var say = message.Recognition
         logUtil.writeInfo(message.FromUserName + "  语音输入——【" + say + "】")
         if (say.length > 0) {
-            var rse_ = await _command(say, message.FromUserName)
-            if (rse_.state === 1) { //执行完成
-                reply = rse_.val + " " + rse_.msg
-            } else if (rse_.state === 2) { //权限不足
-                reply = rse_.msg
-            } else { //非法指令
-                reply = "【" + say + "】\n" + rse_.msg
-            }
+            reply = (await carryout(say, message.FromUserName))
         } else {
-            reply = "未识别到信息,请确保语音输入有效.重试还不能解决请联系管理员打开语音识别接口"
+            reply = "未识别到信息!!!\n请确保语音输入有效.请重试"
         }
 
     } else {
@@ -278,28 +262,94 @@ function _matching_id(items, val) {
 async function _command(_msg, Uid) {
     var cswdic = matching(_msg)
     if (cswdic.state === 1) {
-        var policy = rule[cswdic.val]
+        var policy = rule.data[cswdic.val]
         if (policy.check) {
             if (!_matching_id(policy.openid, Uid)) {
                 return {
-                    state: 2,
+                    state: 101,
                     msg: "抱歉！ 您没有执行这条指令的权限"
                 }
             }
         }
         var msg_ = await policy.event()
-        if (msg_ === "ok") {
-            msg_ = "指令已送达"
+        try {
+            msg_ = JSON.parse(msg_)
+            if (msg_ === "ok") {
+                msg_ = "指令已送达"
+                return {
+                    state: 1,
+                    val: cswdic.val,
+                    msg: msg_
+                }
+            } else if (Object.prototype.toString.call(msg_) === "[object Array]" && msg_.length > 0) {
+                return {
+                    state: 2,
+                    val: cswdic.val,
+                    msg: msg_
+                }
+            } else {
+                return {
+                    state: 0,
+                    val: cswdic.val,
+                    msg: msg_
+                }
+            }
+        } catch (error) {
+            return {
+                state: 0,
+                val: cswdic.val,
+                msg: msg_
+            }
         }
-        return {
-            state: 1,
-            val: cswdic.val,
-            msg: msg_
-        }
+
     } else {
         return {
-            state: 0,
+            state: 100,
             msg: "抱歉！ 我无法识别您的指令且不能完成"
         }
     }
+}
+
+
+/**处理指令
+ * 
+ * @param {*} params 
+ */
+async function carryout(order, userid) {
+    var res = {
+        state: 0,
+        msg: ""
+    }
+    res = await _command(order, userid)
+    var result = ""
+    if (res.state === 1) { //执行完成
+        result = res.val + ":\n" + res.msg
+    }
+    if (res.state === 2) {
+        result = res.val + ":"
+        res.msg.forEach(function(item) {
+            var dic = []
+            var val = item.remark.split(";")
+            val.forEach(function(item) {
+                var _v = item.split("=")
+                dic[_v[0]] = _v[1]
+            })
+            if (dic[item.value] != null || typeof(dic[item.value]) != "undefined") {
+                result += "\n" + item.varid + " " + dic[item.value]
+            } else {
+                result += "\n" + item.varid + " 【" + item.value + "】 \t\t" + item.remark
+            }
+
+        })
+
+    } else if (res.state === 101) { //权限不足
+        result = res.msg
+    } else if (res.state === 100) { //未识别指令
+        result = "【" + order + "】\n" + res.msg
+    } else if (res.state === 0) { //返回结果未识别
+        result = res.msg
+    } else { //非法指令
+    }
+
+    return result
 }
