@@ -2,7 +2,7 @@
 
 const router = require("koa-router")()
 var Wechat = require("../wechat/wechat")
-var config = require("../config")
+var config = require("../config/config")
 var request = require("request")
 var cswapi = require("../csw/csw")
 var moment = require("moment-timezone")

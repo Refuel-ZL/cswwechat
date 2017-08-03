@@ -1,8 +1,8 @@
 "use strict"
 
 var path = require("path")
-var util = require("./libs/util")
-var wechat_flie = path.join(__dirname, "./config/wechat.json")
+var util = require("../libs/util")
+var wechat_flie = path.join(__dirname, "./wechat.json")
 
 var config = {
     greetings: "你好，欢迎关注湖南康森韦尔科技园",

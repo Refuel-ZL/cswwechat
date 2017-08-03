@@ -1,7 +1,7 @@
 "use strict"
 const router = require("koa-router")()
 var Wechat = require("../wechat/wechat")
-var config = require("../config")
+var config = require("../config/config")
 router.prefix("/users")
 
 var wechatApi = new Wechat(config.wechat)

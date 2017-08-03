@@ -1,4 +1,4 @@
-var config = require("../config")
+var config = require("../config/config")
 
 var getRawBody = require("raw-body")
 var sha1 = require("sha1")

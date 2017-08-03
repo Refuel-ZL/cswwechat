@@ -1,6 +1,6 @@
 "use strict"
 
-var config = require("../config")
+var config = require("../config/config")
 var Wechat = require("../wechat/wechat")
 var csw = require("../csw/csw")
 var menu = require("./menu")
