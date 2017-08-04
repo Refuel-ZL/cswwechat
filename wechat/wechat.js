@@ -977,8 +977,8 @@ Wechat.prototype.Sendtemplate = async function(data_) {
                     logUtil.writeErr("发送模板信息失败 " + err)
                     reject(err)
                 }
-                logUtil.writeInfo("发送模板信息结果 " + err)
-                resolve(JSON.parse(body))
+                logUtil.writeInfo("发送模板信息结果 " + body)
+                resolve(JSON.stringify(body))
             })
         } catch (error) {
             throw new Error("Send template")
@@ -1000,6 +1000,6 @@ Wechat.prototype.reply = function() {
     this.status = 200
     this.type = "application/xml"
     this.body = xml
-    logUtil.writeInfo(message.FromUserName + "  将收到信息——" + xml)
+    logUtil.writeInfo(message.FromUserName + "  将收到信息——" + JSON.stringify(content))
 }
 module.exports = Wechat

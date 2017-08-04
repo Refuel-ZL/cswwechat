@@ -7,7 +7,8 @@ var reply = require("../wx/reply")
 var rule = require("../csw/rule")
 var moment = require("moment-timezone")
 const logUtil = require("../utils/log4js/log_utils")
-
+var fsutil = require("../libs/util")
+var path = require("path")
 
 moment.tz.setDefault("Asia/Shanghai")
 var wechatApi = new Wechat(config.wechat)
@@ -66,38 +67,44 @@ router.all("/sendtextall", async function(ctx, next) {
 
 router.all("/sendtemplate", async(ctx, next) => {
     try {
-        var body = ""
         var parameter = ctx.query.msg || ctx.request.body.msg
         logUtil.writeInfo("接收到模板信息" + parameter)
         parameter = JSON.parse(parameter)
-        var template_id = rule.SmsTemplate[parameter.type].template
-        var SmsTemplate = rule.SmsTemplate[parameter.type].group
-        if (template_id && SmsTemplate) {
-            for (var index = 0; index < SmsTemplate.length; index++) {
-                var data_ = {
-                    "touser": SmsTemplate[index],
-                    "template_id": template_id,
-                    "data": {
-                        "text": {
-                            "value": parameter.content
-                        }
-                    }
-                }
-                body += JSON.stringify(await wechatApi.Sendtemplate(data_))
+        if (rule.SmsTemplate[parameter.type] && rule.SmsTemplate[parameter.type].form && rule.SmsTemplate[parameter.type].group) {
+            var template = rule.SmsTemplate[parameter.type]
+            var SmsTemplate = template.group
+            var data_ = template.form
+            data_.data.text.value = parameter.content
+            if (template.format) {
+                data_.data.text.value = template.format(parameter, data_)
             }
-            logUtil.writeInfo("发送模板信息结果：" + body)
+            if (template.details) {
+                data_.url = config.host + template.details(parameter, data_)
+            }
+            for (var index = 0; index < SmsTemplate.length; index++) {
+                data_.touser = SmsTemplate[index]
+                await wechatApi.Sendtemplate(data_)
+            }
+            logUtil.writeInfo("此次发送模板信息结束：")
             ctx.body = "ok"
         } else {
-            logUtil.writeInfo("没找到模板或没有制定发送用户组")
-            ctx.body = "没找到模板或没有制定发送用户组"
+            logUtil.writeErr(`没有【${parameter.type}】预备的模板格式或没有制定发送用户组`)
+            ctx.body = "非合法请求或没找到模板或没有制定发送用户组"
         }
-
-
     } catch (error) {
         logUtil.writeErr(error)
         ctx.body = error
     }
     await next()
+})
+
+router.get("/details/:name", async(ctx, next) => {
+    var name = ctx.params.name
+    var data = JSON.parse(await fsutil.readFileAsync(path.join(__dirname, "../details", name)))
+    await ctx.render("details", {
+        title: name,
+        data: data
+    })
 })
 
 module.exports = router

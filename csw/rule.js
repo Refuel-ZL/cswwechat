@@ -1,45 +1,159 @@
 "use strict"
 
 const cswapi = require("./csw")
+var path = require("path")
+var fsutil = require("../libs/util")
 
 /**用户id  手动分组 */
 var idlist = {
     1: ["oKE7Gwt58KL2mBAFLLWpP1YGFyoo", "oKE7GwntwwTWx626GyrQIfR2M27g"],
     2: ["oKE7Gwt58KL2mBAFLLWpP1YGFcco"],
     // "自己": ["oKE7Gwt58KL2mBAFLLWpP1YGFyoo", "oKE7GwjF8RScFBw-n5X6159I-UBM"],
-    "自己": ["oKE7Gwt58KL2mBAFLLWpP1YGFyoo"],
+    "自己": ["oKE7Gwt58KL2mBAFLLWpP1YGFyoo", "oKE7GwntwwTWx626GyrQIfR2M27g"],
     "csw": ["oLy1e07NL-biW7EI5uVRu31OjMgA", "oLy1e0y-W2eTwzeKkMcLkVKVCh94"]
 
 }
 
 /** 转发告警信息的规则和微信模板id */
 var SmsTemplate = {
+
     "报警信息": {
-        "template": "3YcUrJAmPynJAzjEmkQ_sbHWmxmS-qAbGslGWETTmhM",
+        "form": {
+            "touser": "用户id",
+            "template_id": "3YcUrJAmPynJAzjEmkQ_sbHWmxmS-qAbGslGWETTmhM",
+            "data": {
+                "text": {
+                    "value": "内容"
+                }
+            }
+        },
         "group": _getid(["自己"])
     },
     "统计报告": {
-        "template": "xizPyok8_4xYnp4VV-jMxeFB8f8O5OAdA6Y-O-6jGTM",
+        "form": {
+            "touser": "用户id",
+            "template_id": "xizPyok8_4xYnp4VV-jMxeFB8f8O5OAdA6Y-O-6jGTM",
+            "data": {
+                "text": {
+                    "value": "内容"
+                }
+            }
+        },
         "group": _getid(["自己"])
     },
     "ZLT网络运维": {
         "template": "vOAKQy82cwsupZTLOWrpcyOLp4NAI0HcdEbhIS-RIFg",
+        "form": {
+            "touser": "用户id",
+            "template_id": "vOAKQy82cwsupZTLOWrpcyOLp4NAI0HcdEbhIS-RIFg",
+            "data": {
+                "text": {
+                    "value": "内容"
+                }
+            }
+        },
         "group": _getid(["自己"])
-    }
+    },
+    "项目统计": {
+        "form": {
+            "touser": "用户id",
+            "template_id": "xizPyok8_4xYnp4VV-jMxeFB8f8O5OAdA6Y-O-6jGTM",
+            "url": "",
+            "data": {
+                "text": {
+                    "value": "内容"
+                }
+            }
+        },
+        "format": function(res) {
+            var n = 5
+            var val = `${res.name}前${n}名 \n(次数---项目名)`
+            for (var i = 0; i < n; i++) {
+                val += "\n" + res.content[i].sum + "\t\t\t\t" + res.content[i].name
+            }
+            return val + "\n更多请点击详情"
+        },
+        "details": function(res, form) {
+            try {
+                var fpath = path.join(__dirname, "../details", res.name)
+                fsutil.writeFileAsync(fpath, JSON.stringify(res))
+                return "details/" + res.name
+            } catch (error) {
+                console.dir(error)
+            }
+
+        },
+        "group": _getid(["自己"])
+    },
     /*
     "报警信息": {
-        "template": "RjLxQM3CCeZGy9a8Z8FFRfiSoHEsp-OeoXOznlGn9Ow",
+        "form": {
+            "touser": "用户id",
+            "template_id": "RjLxQM3CCeZGy9a8Z8FFRfiSoHEsp-OeoXOznlGn9Ow",
+            "data": {
+                "text": {
+                    "value": "内容"
+                }
+            }
+        },
         "group": _getid(["csw"])
     },
     "统计报告": {
-        "template": "sQAw7LHpmtYP9b2ama0wfrX8QA0wgpP3T5SAXinQKJ4",
+        "form": {
+            "touser": "用户id",
+            "template_id": "sQAw7LHpmtYP9b2ama0wfrX8QA0wgpP3T5SAXinQKJ4",
+            "data": {
+                "text": {
+                    "value": "内容"
+                }
+            }
+        },
         "group": _getid(["csw"])
-       }  ,
-        "ZLT网络运维":{
-        "template": "J8yXh5B2U3YFK4rdJaPYD15xfec_39Q_VUQRPJPqQKk",
+    },
+    "ZLT网络运维": {
+        "form": {
+            "touser": "用户id",
+            "template_id": "J8yXh5B2U3YFK4rdJaPYD15xfec_39Q_VUQRPJPqQKk",
+            "data": {
+                "text": {
+                    "value": "内容"
+                }
+            }
+        },
         "group": _getid(["csw"])
-    }
-    */
+    },
+    "项目统计": {
+        "form": {
+            "touser": "用户id",
+            "template_id": "sQAw7LHpmtYP9b2ama0wfrX8QA0wgpP3T5SAXinQKJ4",
+            "url": "",
+            "data": {
+                "text": {
+                    "value": "默认内容"
+                }
+            }
+        },
+        "format": function(res) {
+            var n = 5
+            var val = `${res.name}前${n}名 \n(次数---项目名)`
+            for (var i = 0; i < n; i++) {
+                val += "\n" + res.content[i].sum + "\t\t\t\t" + res.content[i].name
+            }
+            return val + "\n更多请点击详情"
+        },
+        "details": function(res, form) {
+            try {
+                var fpath = path.join(__dirname, "../details", res.name)
+                fsutil.writeFileAsync(fpath, JSON.stringify(res))
+                return "details/" + res.name
+            } catch (error) {
+                console.dir(error)
+            }
+
+        },
+        "group": _getid(["csw"])
+    }*/
+
 }
 
 /** 关键词 权限组 及动作 */

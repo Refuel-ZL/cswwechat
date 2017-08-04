@@ -273,7 +273,6 @@ async function _command(_msg, Uid) {
         }
         var msg_ = await policy.event()
         try {
-            msg_ = JSON.parse(msg_)
             if (msg_ === "ok") {
                 msg_ = "指令已送达"
                 return {
@@ -281,17 +280,20 @@ async function _command(_msg, Uid) {
                     val: cswdic.val,
                     msg: msg_
                 }
-            } else if (Object.prototype.toString.call(msg_) === "[object Array]" && msg_.length > 0) {
-                return {
-                    state: 2,
-                    val: cswdic.val,
-                    msg: msg_
-                }
             } else {
-                return {
-                    state: 0,
-                    val: cswdic.val,
-                    msg: msg_
+                msg_ = JSON.parse(msg_)
+                if (Object.prototype.toString.call(msg_) === "[object Array]" && msg_.length > 0) {
+                    return {
+                        state: 2,
+                        val: cswdic.val,
+                        msg: msg_
+                    }
+                } else {
+                    return {
+                        state: 0,
+                        val: cswdic.val,
+                        msg: msg_
+                    }
                 }
             }
         } catch (error) {
