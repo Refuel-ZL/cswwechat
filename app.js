@@ -13,6 +13,7 @@ var tags = require("./routes/tags")
 var logs = require("./routes/logs")
 var menu = require("./routes/menu")
 var test = require("./routes/test")
+var details = require("./routes/details")
 
 const logUtil = require("./utils/log4js/log_utils")
 
@@ -62,6 +63,7 @@ app.use(tags.routes(), tags.allowedMethods())
 app.use(logs.routes(), logs.allowedMethods())
 app.use(menu.routes(), menu.allowedMethods())
 app.use(test.routes(), test.allowedMethods())
+app.use(details.routes(), details.allowedMethods())
 
 
 app.use(async(ctx) => {

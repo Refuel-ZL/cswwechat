@@ -3,6 +3,9 @@
 const cswapi = require("./csw")
 var path = require("path")
 var fsutil = require("../libs/util")
+var moment = require("moment-timezone")
+
+moment.tz.setDefault("Asia/Shanghai")
 
 /**用户id  手动分组 */
 var idlist = {
@@ -66,94 +69,104 @@ var SmsTemplate = {
             }
         },
         "format": function(res) {
+
             var n = 5
-            var val = `${res.name}前${n}名 \n(次数---项目名)`
-            for (var i = 0; i < n; i++) {
-                val += "\n" + res.content[i].sum + "\t\t\t\t" + res.content[i].name
+            var val = `${moment.unix(res.start ).format("YYYY-MM-DD HH:mm:ss")}~${moment.unix(res.end).format("YYYY-MM-DD HH:mm:ss")}\n`
+            if (res.err) {
+                return val + res.err
             }
-            return val + "\n更多请点击详情"
+            if (res.msg.length > 0) {
+                if (res.msg.length > 5) {
+                    val += `${res.name}前${n}名 \n(次数---项目名)`
+                } else {
+                    n = res.msg.length
+                }
+
+                for (var i = 0; i < n; i++) {
+                    val += "\n" + res.msg[i].sum + "\t\t\t\t" + res.msg[i].name
+                }
+                return val + "\n更多内容请点击详情"
+            } else {
+                return val + "暂无结果"
+            }
+
         },
         "details": function(res, form) {
             try {
-                var fpath = path.join(__dirname, "../details", res.name)
-                fsutil.writeFileAsync(fpath, JSON.stringify(res))
-                return "details/" + res.name
+                if (res.err) {
+                    return ""
+                }
+                if (res.msg.length > 0) {
+                    var fpath = path.join(__dirname, "../details/prosum", "prosum_" + res.start + "_" + res.end)
+                    fsutil.writeFileAsync(fpath, JSON.stringify(res))
+                    return "details/prosum/" + "prosum_" + res.start + "_" + res.end
+                } else {
+                    return ""
+                }
             } catch (error) {
                 console.dir(error)
+                return ""
             }
 
         },
         "group": _getid(["自己"])
     },
-    /*
-    "报警信息": {
+    "平安短信分析": {
         "form": {
             "touser": "用户id",
-            "template_id": "RjLxQM3CCeZGy9a8Z8FFRfiSoHEsp-OeoXOznlGn9Ow",
-            "data": {
-                "text": {
-                    "value": "内容"
-                }
-            }
-        },
-        "group": _getid(["csw"])
-    },
-    "统计报告": {
-        "form": {
-            "touser": "用户id",
-            "template_id": "sQAw7LHpmtYP9b2ama0wfrX8QA0wgpP3T5SAXinQKJ4",
-            "data": {
-                "text": {
-                    "value": "内容"
-                }
-            }
-        },
-        "group": _getid(["csw"])
-    },
-    "ZLT网络运维": {
-        "form": {
-            "touser": "用户id",
-            "template_id": "J8yXh5B2U3YFK4rdJaPYD15xfec_39Q_VUQRPJPqQKk",
-            "data": {
-                "text": {
-                    "value": "内容"
-                }
-            }
-        },
-        "group": _getid(["csw"])
-    },
-    "项目统计": {
-        "form": {
-            "touser": "用户id",
-            "template_id": "sQAw7LHpmtYP9b2ama0wfrX8QA0wgpP3T5SAXinQKJ4",
+            "template_id": "xizPyok8_4xYnp4VV-jMxeFB8f8O5OAdA6Y-O-6jGTM",
             "url": "",
             "data": {
                 "text": {
-                    "value": "默认内容"
+                    "value": "内容"
                 }
             }
         },
         "format": function(res) {
-            var n = 5
-            var val = `${res.name}前${n}名 \n(次数---项目名)`
-            for (var i = 0; i < n; i++) {
-                val += "\n" + res.content[i].sum + "\t\t\t\t" + res.content[i].name
+            var val = ""
+            var sum = res.msg.sum
+            var add = res.msg.add
+            var lack = res.msg.lack
+            val = `${res.groupType}:当前周期【${moment.unix(res.start).format("YYYY-MM-DD HH:mm:ss")}~${moment.unix(res.end).format("YYYY-MM-DD HH:mm:ss")}】`
+            if (res.err) {
+                return val + res.err
             }
-            return val + "\n更多请点击详情"
+            if (sum > 0) {
+                val += `\n\n本周期共计收到${sum}个项目的平安短信`
+                if (add > 0) {
+                    val += `\n其中相比上周期有${add}个项目是新增的。`
+                } else {
+                    val += "\n没有项目是新增的。"
+                }
+
+            } else {
+                val += "\n\n本周期未收到平安短信"
+            }
+            if (lack > 0) {
+                val += `\n请注意：上周期汇报的项目中有【${lack}】个在本周期没有进行汇报。`
+            }
+            return val
         },
         "details": function(res, form) {
             try {
-                var fpath = path.join(__dirname, "../details", res.name)
-                fsutil.writeFileAsync(fpath, JSON.stringify(res))
-                return "details/" + res.name
+                if (res.err) {
+                    return ""
+                }
+                if (res.msg.add != "0" || res.msg.lack != "0") {
+                    var fpath = path.join(__dirname, "../details/smsreport/", "smsreport_" + res.start + "_" + res.end)
+                    fsutil.writeFileAsync(fpath, JSON.stringify(res))
+                    return "details/smsreport/" + "smsreport_" + res.start + "_" + res.end
+                } else {
+                    return ""
+                }
+
             } catch (error) {
                 console.dir(error)
+                return ""
             }
-
         },
-        "group": _getid(["csw"])
-    }*/
-
+        "group": _getid(["自己"])
+    }
 }
 
 /** 关键词 权限组 及动作 */

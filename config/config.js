@@ -19,7 +19,7 @@ var config = {
         appSecret: "7102f0173f65ce448f0aa9d62f0240d4",
         token: "zlrefuel",
         getAccessToken: function() {
-            return util.readFileAsync(wechat_flie)
+            return util.readFileAsync(wechat_flie, "utf-8")
         },
         saveAccessToken: function(data) {
             data = JSON.stringify(data)
@@ -37,7 +37,7 @@ var proconfig = {
         appSecret: "39b47ebeeead0e5ff09b5c360bf17226",
         token: "Cq8nEQJwIxy7L3K0FP86VMyhETcSUsyE",
         getAccessToken: function() {
-            return util.readFileAsync(wechat_flie)
+            return util.readFileAsync(wechat_flie, "utf-8")
         },
         saveAccessToken: function(data) {
             data = JSON.stringify(data)

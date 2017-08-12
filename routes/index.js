@@ -70,16 +70,17 @@ router.all("/sendtemplate", async(ctx, next) => {
         var parameter = ctx.query.msg || ctx.request.body.msg
         logUtil.writeInfo("接收到模板信息" + parameter)
         parameter = JSON.parse(parameter)
-        if (rule.SmsTemplate[parameter.type] && rule.SmsTemplate[parameter.type].form && rule.SmsTemplate[parameter.type].group) {
-            var template = rule.SmsTemplate[parameter.type]
+        if (rule.SmsTemplate[parameter.groupType] && rule.SmsTemplate[parameter.groupType].form && rule.SmsTemplate[parameter.groupType].group) {
+            var template = rule.SmsTemplate[parameter.groupType]
             var SmsTemplate = template.group
             var data_ = template.form
-            data_.data.text.value = parameter.content
+            data_.data.text.value = parameter.msg
             if (template.format) {
                 data_.data.text.value = template.format(parameter, data_)
             }
             if (template.details) {
-                data_.url = config.host + template.details(parameter, data_)
+                var suffix = template.details(parameter, data_)
+                data_.url = suffix ? config.host + suffix : ""
             }
             for (var index = 0; index < SmsTemplate.length; index++) {
                 data_.touser = SmsTemplate[index]
@@ -98,13 +99,6 @@ router.all("/sendtemplate", async(ctx, next) => {
     await next()
 })
 
-router.get("/details/:name", async(ctx, next) => {
-    var name = ctx.params.name
-    var data = JSON.parse(await fsutil.readFileAsync(path.join(__dirname, "../details", name)))
-    await ctx.render("details", {
-        title: name,
-        data: data
-    })
-})
+
 
 module.exports = router
